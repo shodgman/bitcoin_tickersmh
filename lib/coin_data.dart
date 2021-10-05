@@ -55,23 +55,19 @@ class CoinData {
         'https://$coinHostSite$coinExtended/$crypto/$currency?apikey=$apiKey';
     print(myExtended);
     myExtended =
-        'https://rest.coinapi.io/v1/exchangerate/BTC/USD?apikey=5F6AED68-1ED3-4F85-8D04-C46B32EBE12F';
+        'https://rest.coinapi.io/v1/exchangerate/BTI/USD?apikey=5F6AED68-1ED3-4F85-8D04-C46B32EBE12F';
     // Query and response
     // Await the http get response, then decode the json-formatted response.
-    //http.Response response = await http.get(Uri.parse(myExtended));
+
     NetworkHelper httpHelper = NetworkHelper(myExtended);
-    var response = await httpHelper.getData();
+    http.Response response = await httpHelper.getData();
     // decode response: extract
     if (response.statusCode == 200) {
       print('Response = 200');
       String data = response.body;
+      return jsonDecode(data);
 
-      //print('JSON Version');
-      //print(jsonDecode(data));
-      //print(jsonDecode(data));
-      return data;
-
-      return jsonDecode(data) ?? '{}';
+      //return jsonDecode(data) ?? '{}';
     } else {
       // error
       print('Error response ${response.statusCode}');

@@ -17,12 +17,9 @@ class NetworkHelper {
     Uri uri = Uri.parse(url);
     http.Response response = await http.get(uri);
     if (response.statusCode == 200) {
-      print(response.body);
-      String data = response.body;
-      return jsonDecode(data);
+      return response;
     } else {
-      print(response.statusCode);
-      return null;
+      throw Exception('Network returned ${response.statusCode}');
     }
   }
 
