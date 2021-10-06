@@ -10,6 +10,8 @@ class PriceScreen extends StatefulWidget {
 
 class _PriceScreenState extends State<PriceScreen> {
   String selectedCurrency = 'USD';
+  String selectedRate = '?';
+  String bitcoinMessage = '1 BTC = ? USD';
 
   DropdownButton<String> androidDropdown() {
     List<DropdownMenuItem<String>> dropdownItems = [];
@@ -27,6 +29,7 @@ class _PriceScreenState extends State<PriceScreen> {
       onChanged: (value) {
         setState(() {
           selectedCurrency = value ?? 'AUD';
+          getData();
         });
       },
     );
@@ -43,6 +46,8 @@ class _PriceScreenState extends State<PriceScreen> {
       itemExtent: 32.0,
       onSelectedItemChanged: (selectedIndex) {
         print(selectedIndex);
+        selectedCurrency = currenciesList[selectedIndex];
+        getData();
       },
       children: pickerItems,
     );
@@ -51,18 +56,25 @@ class _PriceScreenState extends State<PriceScreen> {
   //TODO: Create a method here called getData() to get the coin data from coin_data.dart
 
   void getData() async {
-    // Get Coin Data and update variables
-    CoinData? myCoinData = CoinData();
-    String myQuote = await myCoinData.getCoinData();
-    print('My Quote = ');
-    print(myQuote);
+    try {
+      // Get Coin Data and update variables
+      CoinData myCoinData = CoinData();
+      var myQuote = await myCoinData.getCoinData(
+          crypto: 'BTC', currency: selectedCurrency);
+      double rate = myQuote['rate'];
+      print('My Quote = ${rate.toInt().toString()}');
+      setState(() {
+        selectedRate = rate.toInt().toString();
+        bitcoinMessage = '1 BTC = $selectedRate $selectedCurrency';
+      });
+    } catch (e) {
+      print(e.toString());
+    }
   }
 
   @override
   void initState() {
     super.initState();
-    //TODO: Call getData() when the screen loads up.
-    print('Calling getData()');
     getData();
   }
 
@@ -88,7 +100,7 @@ class _PriceScreenState extends State<PriceScreen> {
                 padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 28.0),
                 child: Text(
                   //TODO: Update the Text Widget with the live bitcoin data here.
-                  '1 BTC = ? USD',
+                  bitcoinMessage,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 20.0,
