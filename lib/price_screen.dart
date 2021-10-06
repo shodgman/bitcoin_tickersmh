@@ -8,10 +8,15 @@ class PriceScreen extends StatefulWidget {
   _PriceScreenState createState() => _PriceScreenState();
 }
 
+class CryptoRateCard {
+  // not used?
+}
+
 class _PriceScreenState extends State<PriceScreen> {
   String selectedCurrency = 'USD';
   String selectedRate = '?';
   String bitcoinMessage = '1 BTC = ? USD';
+  var cryptoRateMessage = Map<String, String>();
 
   DropdownButton<String> androidDropdown() {
     List<DropdownMenuItem<String>> dropdownItems = [];
@@ -45,7 +50,7 @@ class _PriceScreenState extends State<PriceScreen> {
       backgroundColor: Colors.lightBlue,
       itemExtent: 32.0,
       onSelectedItemChanged: (selectedIndex) {
-        print(selectedIndex);
+        //print(selectedIndex);
         selectedCurrency = currenciesList[selectedIndex];
         getData();
       },
@@ -53,29 +58,95 @@ class _PriceScreenState extends State<PriceScreen> {
     );
   }
 
-  //TODO: Create a method here called getData() to get the coin data from coin_data.dart
-
+  // Does the retrieval of all current rates and does a setstate update
+  // General try catch around everything
+  // This is called when started and a currency is selected
   void getData() async {
     try {
       // Get Coin Data and update variables
       CoinData myCoinData = CoinData();
-      var myQuote = await myCoinData.getCoinData(
-          crypto: 'BTC', currency: selectedCurrency);
-      double rate = myQuote['rate'];
-      print('My Quote = ${rate.toInt().toString()}');
-      setState(() {
-        selectedRate = rate.toInt().toString();
-        bitcoinMessage = '1 BTC = $selectedRate $selectedCurrency';
-      });
+      double rate = 0.0;
+      var myQuote;
+      String myError = '';
+
+      // Iterate the list of crypto currencies and update the rate for each
+      for (String thisCrypto in cryptoList) {
+        // Receive the JSON data.
+        //print('Asking for $thisCrypto');
+        myQuote = await myCoinData.getCoinData(
+            crypto: thisCrypto, currency: selectedCurrency);
+
+        print(myQuote is List);
+
+        if (myQuote['error']) {
+          // Error from coinAPI
+          myError = myQuote['error'];
+        } else if (myQuote['_ErrorCode']) {
+          // Error from http
+          myError = myQuote['_ErrorCode'];
+        } else {
+          // All OK so get rate
+          print('All OK');
+          rate = myQuote['rate'];
+        }
+
+        setState(() {
+          if (myError == '') {
+            cryptoRateMessage[thisCrypto] = myError;
+          } else {
+            cryptoRateMessage[thisCrypto] =
+                '1 $thisCrypto = ${rate.toInt().toString()} $selectedCurrency';
+            print(cryptoRateMessage[thisCrypto]);
+          }
+        });
+      }
     } catch (e) {
       print(e.toString());
+    }
+  }
+
+  // Generate currency conversion buttons
+  List<Widget> generateRateTabs() {
+    List<Widget> children = [];
+
+    for (String crypto in cryptoList) {
+      // For each Crypto Currency Assign a variable
+      children.add(Card(
+        color: Colors.lightBlueAccent,
+        elevation: 5.0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10.0),
+        ),
+        child: Padding(
+          padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 28.0),
+          child: Text(
+            cryptoRateMessage[crypto]!,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 20.0,
+              color: Colors.white,
+            ),
+          ),
+        ),
+      ));
+    }
+    return children;
+  } //End of currency conversion buttons
+
+  void populateRateMessageMap() {
+    for (String crypto in cryptoList) {
+      // Add this currency
+      cryptoRateMessage[crypto] = '1 $crypto = ? $selectedCurrency';
     }
   }
 
   @override
   void initState() {
     super.initState();
-    getData();
+    // dynamically generate cryptoRateMessage map
+    populateRateMessageMap(); // done once
+    // Get initial data
+    //getData();
   }
 
   @override
@@ -90,24 +161,9 @@ class _PriceScreenState extends State<PriceScreen> {
         children: <Widget>[
           Padding(
             padding: EdgeInsets.fromLTRB(18.0, 18.0, 18.0, 0),
-            child: Card(
-              color: Colors.lightBlueAccent,
-              elevation: 5.0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10.0),
-              ),
-              child: Padding(
-                padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 28.0),
-                child: Text(
-                  //TODO: Update the Text Widget with the live bitcoin data here.
-                  bitcoinMessage,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 20.0,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: generateRateTabs(),
             ),
           ),
           Container(
@@ -115,7 +171,18 @@ class _PriceScreenState extends State<PriceScreen> {
             alignment: Alignment.center,
             padding: EdgeInsets.only(bottom: 30.0),
             color: Colors.lightBlue,
-            child: Platform.isIOS ? iOSPicker() : androidDropdown(),
+            child: Column(
+              children: [
+                Text(
+                  'Select a currency:',
+                  style: TextStyle(fontSize: 24, color: Colors.black45),
+                ),
+                SizedBox(
+                  height: 20,
+                ),
+                Platform.isIOS ? iOSPicker() : androidDropdown(),
+              ],
+            ),
           ),
         ],
       ),

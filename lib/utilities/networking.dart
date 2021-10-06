@@ -12,9 +12,11 @@ class NetworkHelper {
   NetworkHelper(this.url);
 
   final String url;
-  // Return a JSON encoded string using the url
+
+  // Return a JSON encoded string using the url we were initialised with
   Future getJsonData() async {
     Uri uri = Uri.parse(url);
+    //print('Sending the GET');
     http.Response response = await http.get(uri);
     if (response.statusCode == 200) {
       String jsonBody = response.body;
@@ -23,9 +25,17 @@ class NetworkHelper {
       //print('After Decode');
       return dyn;
     } else {
-      String statusCode = response.statusCode.toString();
-      var errorMsg = '{"_ErrorCode:" $statusCode}';
-      return errorMsg;
+      // if (response.statusCode > 400) {
+      //   print(response.body);
+      //   var err = jsonDecode(response.body);
+      //   return err;
+      // }
+      //String statusCode = response.statusCode.toString();
+      print('StatusCode = ${response.statusCode}');
+      var errorJson =
+          '''[{"_ErrorCode": "HTTP Status ${response.statusCode}"}]''';
+      var err = jsonDecode(errorJson);
+      return err;
     }
   }
 
