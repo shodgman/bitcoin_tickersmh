@@ -47,7 +47,7 @@ class CoinData {
     NetworkHelper httpHelper = NetworkHelper(myExtended);
     // Do the Get based on the url. NB: Returns a dynamic variable, encoded JSON
     var response = await httpHelper.getJsonData();
-    print('Returned response');
+    //print('Returned response');
     // TODO Ignore errors for now
     return response;
   }

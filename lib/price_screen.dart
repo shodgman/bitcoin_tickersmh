@@ -76,12 +76,10 @@ class _PriceScreenState extends State<PriceScreen> {
         myQuote = await myCoinData.getCoinData(
             crypto: thisCrypto, currency: selectedCurrency);
 
-        print(myQuote is List);
-
-        if (myQuote['error']) {
+        if (myQuote['error'] != '') {
           // Error from coinAPI
           myError = myQuote['error'];
-        } else if (myQuote['_ErrorCode']) {
+        } else if (myQuote['_ErrorCode'] != '') {
           // Error from http
           myError = myQuote['_ErrorCode'];
         } else {
@@ -91,7 +89,7 @@ class _PriceScreenState extends State<PriceScreen> {
         }
 
         setState(() {
-          if (myError == '') {
+          if (myError != '') {
             cryptoRateMessage[thisCrypto] = myError;
           } else {
             cryptoRateMessage[thisCrypto] =

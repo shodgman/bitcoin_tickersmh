@@ -25,16 +25,9 @@ class NetworkHelper {
       //print('After Decode');
       return dyn;
     } else {
-      // if (response.statusCode > 400) {
-      //   print(response.body);
-      //   var err = jsonDecode(response.body);
-      //   return err;
-      // }
-      //String statusCode = response.statusCode.toString();
-      print('StatusCode = ${response.statusCode}');
-      var errorJson =
-          '''[{"_ErrorCode": "HTTP Status ${response.statusCode}"}]''';
-      var err = jsonDecode(errorJson);
+      // Return anyway
+      String jsonError = response.body;
+      var err = jsonDecode(jsonError);
       return err;
     }
   }
