@@ -90,7 +90,7 @@ class _PriceScreenState extends State<PriceScreen> {
 
         setState(() {
           if (myError != '') {
-            cryptoRateMessage[thisCrypto] = myError.substring(0, 20);
+            cryptoRateMessage[thisCrypto] = myError.substring(0, 20); // will not overflow GUI
           } else {
             cryptoRateMessage[thisCrypto] =
                 '1 $thisCrypto = ${rate.toInt().toString()} $selectedCurrency';
